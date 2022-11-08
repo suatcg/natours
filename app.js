@@ -7,9 +7,15 @@ const userRouter = require('./routes/userRoutes');
 const app = express();
 
 // 1) MIDDLEWARES
-app.use(morgan('dev'));
+// console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 app.use(express.json());
+
+// Serving static files
+app.use(express.static(`${__dirname}/public`));
 
 // custom middleware
 app.use((req, res, next) => {
