@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
+// Uncaught Exceptions
+process.on('uncaughtException', (err) => {
+  console.log('ERROR: ', err.name, err.message);
+  console.log('UNCAUGHT EXEPTION: 🔥 Shutting down...');
+  process.exit(1);
+});
+
 dotenv.config({ path: './config.env' });
 const app = require('./app');
 
@@ -15,11 +22,13 @@ mongoose
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    useUnifiedTopology: true,
   })
   .then(() => {
     // console.log(con.connections);
     console.log('DB connection successful!');
   });
+// .catch((err) => console.error('ERROR'));
 
 // Testind model Tour
 // const testTour = new Tour({
@@ -43,7 +52,20 @@ mongoose
 // console.log(process.env);
 
 const port = process.env.PORT;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`App running on port ${port}...`);
+  console.log('Enviorment :', process.env.NODE_ENV);
+});
+
+// Resolve Unhandler promise rejection
+process.on('unhandledRejection', (err) => {
+  console.log('ERROR: ', err.name);
+  // console.log(err.message);
+
+  console.log('UNHANDLER REJECTION: 🔥 Shutting down...');
+  // 0 -> success ,1 -> uncaught exception
+  server.close(() => {
+    process.exit(1);
+  });
 });
